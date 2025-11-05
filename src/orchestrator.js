@@ -112,8 +112,41 @@ async function runForecasting() {
     // const customerReports = excelReporter.generateCustomerReports(allProposals);
     // logger.info(`✓ Generated ${customerReports.length} individual customer reports`);
 
-    // Step 7: Cleanup
-    logger.info('Step 7: Cleaning up...');
+    // Step 7: Send to Odoo (if enabled)
+    let odooResult = null;
+    if (config.odoo.enabled) {
+      logger.info('Step 7: Sending orders to Odoo...');
+      try {
+        const odooClient = require('./services/odoo/odooClient');
+        const odooOrderService = require('./services/odoo/odooOrderService');
+
+        // Connect to Odoo
+        await odooClient.connect();
+
+        // Send all proposals to Odoo
+        odooResult = await odooOrderService.sendAllProposalsToOdoo(allProposals);
+
+        logger.info(`✓ Odoo sync complete: ${odooResult.successful} orders created`);
+        logger.info(`  - Salesmen: ${odooResult.salesmenCount}`);
+        logger.info(`  - Failed: ${odooResult.failed}`);
+
+        // Optionally auto-confirm orders
+        if (config.odoo.autoConfirmOrders && odooResult.successful > 0) {
+          logger.info('Auto-confirming orders in Odoo...');
+          const orderIds = odooResult.successfulOrders.map(o => o.orderId);
+          await odooOrderService.confirmSaleOrders(orderIds);
+          logger.info('✓ Orders confirmed');
+        }
+      } catch (error) {
+        logger.error('Failed to sync with Odoo', { error: error.message });
+        // Continue even if Odoo sync fails
+      }
+    } else {
+      logger.info('Step 7: Odoo integration disabled (skipping)');
+    }
+
+    // Step 8: Cleanup
+    logger.info('Step 8: Cleaning up...');
     await sapB1Client.logout();
     logger.info('✓ Disconnected from SAP B1');
 
@@ -124,6 +157,9 @@ async function runForecasting() {
     logger.info('Forecasting completed successfully!');
     logger.info(`Duration: ${duration} seconds`);
     logger.info(`Report: ${mainReportPath}`);
+    if (odooResult) {
+      logger.info(`Odoo: ${odooResult.successful} orders created for ${odooResult.salesmenCount} salesmen`);
+    }
     logger.info('='.repeat(80));
 
     return {
@@ -137,6 +173,15 @@ async function runForecasting() {
         overstockRisks: totalOverstockRisks,
       },
       reportPath: mainReportPath,
+      odoo: odooResult
+        ? {
+            enabled: true,
+            ordersCreated: odooResult.successful,
+            ordersFailed: odooResult.failed,
+            salesmenCount: odooResult.salesmenCount,
+            bySalesman: odooResult.bySalesman,
+          }
+        : { enabled: false },
     };
   } catch (error) {
     logger.error('Forecasting failed', { error: error.message, stack: error.stack });

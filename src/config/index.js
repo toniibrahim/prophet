@@ -83,6 +83,18 @@ const config = {
       durationDays: parseInt(process.env.EID_ADHA_DURATION_DAYS || '4', 10),
     },
   },
+
+  // Odoo Configuration
+  odoo: {
+    enabled: process.env.ODOO_ENABLED === 'true',
+    url: process.env.ODOO_URL,
+    db: process.env.ODOO_DB,
+    username: process.env.ODOO_USERNAME,
+    password: process.env.ODOO_PASSWORD,
+    defaultSalesmanId: process.env.ODOO_DEFAULT_SALESMAN_ID ? parseInt(process.env.ODOO_DEFAULT_SALESMAN_ID, 10) : null,
+    autoConfirmOrders: process.env.ODOO_AUTO_CONFIRM_ORDERS === 'true',
+    createTransferRequests: process.env.ODOO_CREATE_TRANSFER_REQUESTS === 'true',
+  },
 };
 
 /**

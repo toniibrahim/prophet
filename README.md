@@ -32,6 +32,15 @@ A comprehensive Node.js application that reads sales and returns data from SAP B
 - **Alert System**: Highlights high-priority items requiring attention
 - **Customer-specific Reports**: Individual reports for each customer
 
+### Odoo ERP Integration (NEW!)
+- **Automatic Order Creation**: Sends forecasts directly to Odoo as sale orders
+- **Salesman Assignment**: Orders automatically assigned to appropriate salesmen
+- **Mobile VAN Support**: Creates transfer requests for delivery vehicles
+- **Dual Output**: Get both Excel reports AND Odoo orders
+- **Flexible**: Can be enabled/disabled as needed
+- **Auto-Confirmation**: Optional automatic order confirmation
+- **See**: [ODOO_INTEGRATION.md](ODOO_INTEGRATION.md) for setup guide
+
 ### Automation
 - **Scheduled Execution**: Automatic daily forecast generation
 - **Configurable Schedule**: Set custom execution times
