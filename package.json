@@ -7,6 +7,9 @@
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
     "forecast": "node src/index.js --forecast",
+    "backtest": "node src/index.js --backtest",
+    "quick-tune": "node src/index.js --quick-tune",
+    "tune-params": "node src/index.js --tune-params",
     "test": "jest --coverage",
     "lint": "eslint src/**/*.js"
   },
