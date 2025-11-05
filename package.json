@@ -1,0 +1,42 @@
+{
+  "name": "sap-b1-sales-forecaster",
+  "version": "1.0.0",
+  "description": "Advanced sales forecasting and order generation system for SAP B1 using Prophet",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "forecast": "node src/index.js --forecast",
+    "test": "jest --coverage",
+    "lint": "eslint src/**/*.js"
+  },
+  "keywords": [
+    "sap-b1",
+    "forecasting",
+    "prophet",
+    "sales",
+    "demand-planning"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.0",
+    "date-fns": "^3.0.0",
+    "date-fns-tz": "^2.0.0",
+    "dotenv": "^16.3.1",
+    "lodash": "^4.17.21",
+    "moment-timezone": "^0.5.44",
+    "node-schedule": "^2.1.1",
+    "prophet-js": "^1.0.0",
+    "winston": "^3.11.0",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "eslint": "^8.55.0",
+    "jest": "^29.7.0",
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

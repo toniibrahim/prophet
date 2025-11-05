@@ -1,0 +1,18 @@
+# Python dependencies for SAP B1 Sales Forecasting System
+
+# Prophet - Time series forecasting
+prophet==1.1.5
+
+# Data manipulation
+pandas==2.1.4
+numpy==1.26.2
+
+# Date/time handling
+python-dateutil==2.8.2
+
+# Optional: Performance improvements
+pystan==3.8.1
+
+# Optional: Plotting (if you want to generate charts)
+# matplotlib==3.8.2
+# plotly==5.18.0
