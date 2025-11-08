@@ -53,12 +53,13 @@ function getDaysBeforeNow(days) {
 }
 
 /**
- * Check if date is weekend
+ * Check if date is weekend (Friday and Saturday)
  * @param {Date} date
  * @returns {boolean}
  */
 function isWeekendDay(date) {
-  return isWeekend(date);
+  const day = getDay(date);
+  return day === 5 || day === 6; // Friday (5) and Saturday (6)
 }
 
 /**
