@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Import Status - Prophet Forecasting</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">Prophet Forecasting Admin</div>
+        <ul class="nav-menu">
+            <li><a href="/">Dashboard</a></li>
+            <li><a href="/holidays">Holidays</a></li>
+            <li><a href="/ramadan">Ramadan</a></li>
+            <li><a href="/promotions">Promotions</a></li>
+            <li><a href="/imports" class="active">Import Status</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <h1>Data Import Status</h1>
+
+        <p>Track the status of data imports from SAP B1. The system uses incremental loading - first run fetches historical data (2 years by default), subsequent runs only fetch new data since last import.</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Customer Code</th>
+                    <th>Customer Name</th>
+                    <th>Initial Import</th>
+                    <th>Last Import</th>
+                    <th>Records Imported</th>
+                    <th>Status</th>
+                    <th>Error Message</th>
+                </tr>
+            </thead>
+            <tbody id="importsTable">
+                <tr><td colspan="7" class="text-center">Loading...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        async function loadImports() {
+            try {
+                const response = await fetch('/api/imports');
+                const imports = await response.json();
+                const tbody = document.getElementById('importsTable');
+
+                if (imports.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center">No import logs found</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = imports.map(imp => `
+                    <tr>
+                        <td><strong>${imp.customer_code}</strong></td>
+                        <td>${imp.customer_name || '-'}</td>
+                        <td>${new Date(imp.initial_import_date).toLocaleDateString()}</td>
+                        <td>${new Date(imp.last_import_date).toLocaleDateString()}</td>
+                        <td>${imp.records_imported.toLocaleString()}</td>
+                        <td>
+                            <span class="badge ${getBadgeClass(imp.import_status)}">
+                                ${imp.import_status.toUpperCase()}
+                            </span>
+                        </td>
+                        <td>${imp.error_message || '-'}</td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Failed to load imports:', error);
+                const tbody = document.getElementById('importsTable');
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center error">Failed to load import logs</td></tr>';
+            }
+        }
+
+        function getBadgeClass(status) {
+            switch(status) {
+                case 'success': return 'badge-success';
+                case 'failed': return 'badge-danger';
+                case 'in_progress': return 'badge-warning';
+                default: return 'badge-info';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadImports);
+
+        // Auto-refresh every 30 seconds
+        setInterval(loadImports, 30000);
+    </script>
+</body>
+</html>

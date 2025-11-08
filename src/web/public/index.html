@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prophet Forecasting - Admin Dashboard</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">Prophet Forecasting Admin</div>
+        <ul class="nav-menu">
+            <li><a href="/" class="active">Dashboard</a></li>
+            <li><a href="/holidays">Holidays</a></li>
+            <li><a href="/ramadan">Ramadan</a></li>
+            <li><a href="/promotions">Promotions</a></li>
+            <li><a href="/imports">Import Status</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <h1>Dashboard</h1>
+
+        <div class="status-card" id="statusCard">
+            <h2>System Status</h2>
+            <div id="statusContent">
+                <p>Loading...</p>
+            </div>
+        </div>
+
+        <div class="cards-grid">
+            <div class="card">
+                <h3>Holidays</h3>
+                <p class="card-count" id="holidaysCount">-</p>
+                <a href="/holidays" class="btn btn-primary">Manage Holidays</a>
+            </div>
+
+            <div class="card">
+                <h3>Ramadan Dates</h3>
+                <p class="card-count" id="ramadanCount">-</p>
+                <a href="/ramadan" class="btn btn-primary">Manage Ramadan</a>
+            </div>
+
+            <div class="card">
+                <h3>Promotions</h3>
+                <p class="card-count" id="promotionsCount">-</p>
+                <a href="/promotions" class="btn btn-primary">Manage Promotions</a>
+            </div>
+
+            <div class="card">
+                <h3>Import Status</h3>
+                <p class="card-count" id="importsCount">-</p>
+                <a href="/imports" class="btn btn-primary">View Imports</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function loadDashboard() {
+            try {
+                // Load system status
+                const healthResponse = await fetch('/health');
+                const health = await healthResponse.json();
+
+                const statusContent = document.getElementById('statusContent');
+                const stats = health.stats || {};
+
+                statusContent.innerHTML = `
+                    <div class="status-grid">
+                        <div class="status-item ${health.status === 'ok' ? 'status-ok' : 'status-error'}">
+                            <strong>Status:</strong> ${health.status}
+                        </div>
+                        <div class="status-item ${health.database === 'connected' ? 'status-ok' : 'status-error'}">
+                            <strong>Database:</strong> ${health.database}
+                        </div>
+                        <div class="status-item">
+                            <strong>Sales Records:</strong> ${stats.sales_data || 0}
+                        </div>
+                        <div class="status-item">
+                            <strong>Returns Records:</strong> ${stats.returns_data || 0}
+                        </div>
+                    </div>
+                `;
+
+                // Update counts
+                document.getElementById('holidaysCount').textContent = stats.holidays || 0;
+                document.getElementById('ramadanCount').textContent = stats.ramadan_dates || 0;
+                document.getElementById('promotionsCount').textContent = stats.promotions || 0;
+                document.getElementById('importsCount').textContent = stats.import_log || 0;
+            } catch (error) {
+                console.error('Failed to load dashboard:', error);
+                document.getElementById('statusContent').innerHTML = `
+                    <p class="error">Failed to load system status</p>
+                `;
+            }
+        }
+
+        // Load dashboard on page load
+        loadDashboard();
+    </script>
+</body>
+</html>

@@ -84,6 +84,19 @@ const config = {
     },
   },
 
+  // Database Configuration
+  database: {
+    enabled: process.env.DB_ENABLED !== 'false', // Database enabled by default
+    host: process.env.DB_HOST || 'localhost',
+    port: parseInt(process.env.DB_PORT || '5432', 10),
+    name: process.env.DB_NAME || 'prophet_forecast',
+    user: process.env.DB_USER || 'postgres',
+    password: process.env.DB_PASSWORD || '',
+    poolMax: parseInt(process.env.DB_POOL_MAX || '20', 10),
+    initialHistoricalDays: parseInt(process.env.INITIAL_HISTORICAL_DAYS || '730', 10), // 2 years default
+    incrementalFetch: process.env.INCREMENTAL_FETCH_ENABLED !== 'false',
+  },
+
   // Odoo Configuration
   odoo: {
     enabled: process.env.ODOO_ENABLED === 'true',

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Promotions Management - Prophet Forecasting</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">Prophet Forecasting Admin</div>
+        <ul class="nav-menu">
+            <li><a href="/">Dashboard</a></li>
+            <li><a href="/holidays">Holidays</a></li>
+            <li><a href="/ramadan">Ramadan</a></li>
+            <li><a href="/promotions" class="active">Promotions</a></li>
+            <li><a href="/imports">Import Status</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h1>Promotions Management</h1>
+            <button class="btn btn-success" onclick="openModal()">Add Promotion</button>
+        </div>
+
+        <div class="form-group" style="max-width: 200px;">
+            <label for="yearFilter">Filter by Year:</label>
+            <select id="yearFilter" onchange="loadPromotions()">
+                <option value="">All Years</option>
+            </select>
+        </div>
+
+        <div id="message"></div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Year</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Discount</th>
+                    <th>Uplift</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="promotionsTable">
+                <tr><td colspan="9" class="text-center">Loading...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add Promotion</h2>
+                <span class="modal-close" onclick="closeModal()">&times;</span>
+            </div>
+            <form id="promotionForm" onsubmit="savePromotion(event)">
+                <input type="hidden" id="promotionId">
+
+                <div class="form-group">
+                    <label for="promotionName">Promotion Name *</label>
+                    <input type="text" id="promotionName" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="promotionType">Type</label>
+                    <select id="promotionType">
+                        <option value="seasonal">Seasonal</option>
+                        <option value="flash">Flash Sale</option>
+                        <option value="clearance">Clearance</option>
+                        <option value="bundle">Bundle</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="year">Year *</label>
+                    <input type="number" id="year" required min="2020" max="2050">
+                </div>
+
+                <div class="form-group">
+                    <label for="startDate">Start Date *</label>
+                    <input type="date" id="startDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="endDate">End Date *</label>
+                    <input type="date" id="endDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="discountPercentage">Discount Percentage (%)</label>
+                    <input type="number" id="discountPercentage" step="0.01" min="0" max="100">
+                </div>
+
+                <div class="form-group">
+                    <label for="expectedUplift">Expected Sales Uplift (multiplier)</label>
+                    <input type="number" id="expectedUplift" step="0.1" value="1.0" min="0">
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" rows="3"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="isActive" checked> Active
+                    </label>
+                </div>
+
+                <div style="display: flex; gap: 1rem;">
+                    <button type="submit" class="btn btn-success">Save</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/promotions.js"></script>
+</body>
+</html>

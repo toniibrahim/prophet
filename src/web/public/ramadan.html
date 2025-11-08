@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ramadan Dates - Prophet Forecasting</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">Prophet Forecasting Admin</div>
+        <ul class="nav-menu">
+            <li><a href="/">Dashboard</a></li>
+            <li><a href="/holidays">Holidays</a></li>
+            <li><a href="/ramadan" class="active">Ramadan</a></li>
+            <li><a href="/promotions">Promotions</a></li>
+            <li><a href="/imports">Import Status</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h1>Ramadan Dates Management</h1>
+            <button class="btn btn-success" onclick="openModal()">Add Ramadan Dates</button>
+        </div>
+
+        <div id="message"></div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Year</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Duration (Days)</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="ramadanTable">
+                <tr><td colspan="6" class="text-center">Loading...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add Ramadan Dates</h2>
+                <span class="modal-close" onclick="closeModal()">&times;</span>
+            </div>
+            <form id="ramadanForm" onsubmit="saveRamadan(event)">
+                <div class="form-group">
+                    <label for="year">Year *</label>
+                    <input type="number" id="year" required min="2020" max="2050">
+                </div>
+
+                <div class="form-group">
+                    <label for="startDate">Start Date *</label>
+                    <input type="date" id="startDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="endDate">End Date *</label>
+                    <input type="date" id="endDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="notes">Notes</label>
+                    <textarea id="notes" rows="3"></textarea>
+                </div>
+
+                <div style="display: flex; gap: 1rem;">
+                    <button type="submit" class="btn btn-success">Save</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        async function loadRamadan() {
+            try {
+                const response = await fetch('/api/ramadan');
+                const ramadanDates = await response.json();
+                const tbody = document.getElementById('ramadanTable');
+
+                if (ramadanDates.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center">No Ramadan dates found</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = ramadanDates.map(r => {
+                    const start = new Date(r.start_date);
+                    const end = new Date(r.end_date);
+                    const duration = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+
+                    return `
+                        <tr>
+                            <td><strong>${r.year}</strong></td>
+                            <td>${start.toLocaleDateString()}</td>
+                            <td>${end.toLocaleDateString()}</td>
+                            <td>${duration} days</td>
+                            <td><span class="badge ${r.is_active ? 'badge-success' : 'badge-danger'}">${r.is_active ? 'Active' : 'Inactive'}</span></td>
+                            <td class="table-actions">
+                                <button class="btn btn-primary" onclick="editRamadan(${r.year})">Edit</button>
+                                <button class="btn btn-danger" onclick="deleteRamadan(${r.year})">Delete</button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Failed to load Ramadan dates:', error);
+                showMessage('Failed to load Ramadan dates', 'error');
+            }
+        }
+
+        function openModal() {
+            document.getElementById('modalTitle').textContent = 'Add Ramadan Dates';
+            document.getElementById('ramadanForm').reset();
+            document.getElementById('year').value = new Date().getFullYear();
+            document.getElementById('modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+        }
+
+        async function editRamadan(year) {
+            try {
+                const response = await fetch(`/api/ramadan/${year}`);
+                const ramadan = await response.json();
+
+                document.getElementById('modalTitle').textContent = 'Edit Ramadan Dates';
+                document.getElementById('year').value = ramadan.year;
+                document.getElementById('year').readOnly = true;
+                document.getElementById('startDate').value = new Date(ramadan.start_date).toISOString().split('T')[0];
+                document.getElementById('endDate').value = new Date(ramadan.end_date).toISOString().split('T')[0];
+                document.getElementById('notes').value = ramadan.notes || '';
+
+                document.getElementById('modal').classList.add('active');
+            } catch (error) {
+                console.error('Failed to load Ramadan dates:', error);
+                showMessage('Failed to load Ramadan dates', 'error');
+            }
+        }
+
+        async function saveRamadan(event) {
+            event.preventDefault();
+
+            const data = {
+                year: parseInt(document.getElementById('year').value),
+                start_date: document.getElementById('startDate').value,
+                end_date: document.getElementById('endDate').value,
+                notes: document.getElementById('notes').value
+            };
+
+            try {
+                const response = await fetch('/api/ramadan', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    showMessage('Ramadan dates saved successfully', 'success');
+                    closeModal();
+                    loadRamadan();
+                    document.getElementById('year').readOnly = false;
+                } else {
+                    throw new Error('Failed to save Ramadan dates');
+                }
+            } catch (error) {
+                console.error('Failed to save Ramadan dates:', error);
+                showMessage('Failed to save Ramadan dates', 'error');
+            }
+        }
+
+        async function deleteRamadan(year) {
+            if (!confirm(`Are you sure you want to delete Ramadan dates for year ${year}?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/ramadan/${year}`, { method: 'DELETE' });
+                if (response.ok) {
+                    showMessage('Ramadan dates deleted successfully', 'success');
+                    loadRamadan();
+                } else {
+                    throw new Error('Failed to delete Ramadan dates');
+                }
+            } catch (error) {
+                console.error('Failed to delete Ramadan dates:', error);
+                showMessage('Failed to delete Ramadan dates', 'error');
+            }
+        }
+
+        function showMessage(message, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = `<div class="${type}">${message}</div>`;
+            setTimeout(() => { messageDiv.innerHTML = ''; }, 5000);
+        }
+
+        document.addEventListener('DOMContentLoaded', loadRamadan);
+    </script>
+</body>
+</html>
